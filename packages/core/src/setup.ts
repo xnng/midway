@@ -15,6 +15,7 @@ import {
   MidwayApplicationManager,
   MidwayMockService,
   MidwayWebRouterService,
+  ConsoleLoggerFactory,
   safeRequire,
 } from './';
 import defaultConfig from './config/config.default';
@@ -25,7 +26,6 @@ import {
 } from './decorator';
 import * as util from 'util';
 import { join } from 'path';
-import { loggers } from '@midwayjs/logger';
 import { MidwayServerlessFunctionService } from './service/slsFunctionService';
 const debug = util.debuglog('midway:debug');
 
@@ -41,6 +41,7 @@ export async function initializeGlobalApplicationContext(
   // init logger
   const loggerService = await applicationContext.getAsync(MidwayLoggerService, [
     applicationContext,
+    globalOptions,
   ]);
 
   if (loggerService.getLogger('appLogger')) {
@@ -75,6 +76,9 @@ export async function initializeGlobalApplicationContext(
 export async function destroyGlobalApplicationContext(
   applicationContext: IMidwayContainer
 ) {
+  const loggerService = await applicationContext.getAsync(MidwayLoggerService);
+  const loggerFactory = loggerService.getCurrentLoggerFactory();
+
   // stop lifecycle
   const lifecycleService = await applicationContext.getAsync(
     MidwayLifeCycleService
@@ -83,7 +87,7 @@ export async function destroyGlobalApplicationContext(
   // stop container
   await applicationContext.stop();
   clearBindContainer();
-  loggers.close();
+  loggerFactory.close();
   global['MIDWAY_APPLICATION_CONTEXT'] = undefined;
   global['MIDWAY_MAIN_FRAMEWORK'] = undefined;
 }
@@ -112,6 +116,10 @@ export function prepareGlobalApplicationContext(
   // register baseDir and appDir
   applicationContext.registerObject('baseDir', baseDir);
   applicationContext.registerObject('appDir', appDir);
+
+  if (!globalOptions.loggerFactory) {
+    globalOptions.loggerFactory = new ConsoleLoggerFactory();
+  }
 
   if (globalOptions.moduleDetector !== false) {
     if (

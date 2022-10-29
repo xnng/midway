@@ -7,6 +7,7 @@ import {
 import { join } from 'path';
 import { IMidwayLogger, MidwayBaseLogger } from '@midwayjs/logger';
 import { createContextManager } from '@midwayjs/async-hooks-context-manager';
+import { MidwayLoggerFactory } from './loggerFactory';
 
 export function isTypeScriptEnvironment() {
   const TS_MODE_PROCESS_FLAG: string = process.env.MIDWAY_TS_MODE;
@@ -24,7 +25,7 @@ export class BootstrapStarter {
   protected globalConfig: any;
   private applicationContext: IMidwayContainer;
 
-  public configure(options: IMidwayBootstrapOptions) {
+  public configure(options: IMidwayBootstrapOptions = {}) {
     this.globalOptions = options;
     return this;
   }
@@ -34,10 +35,11 @@ export class BootstrapStarter {
     this.baseDir = this.getBaseDir();
 
     this.applicationContext = await initializeGlobalApplicationContext({
-      ...this.globalOptions,
       appDir: this.appDir,
       baseDir: this.baseDir,
       asyncContextManager: createContextManager(),
+      loggerFactory: new MidwayLoggerFactory(),
+      ...this.globalOptions,
     });
     return this.applicationContext;
   }

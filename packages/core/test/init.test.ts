@@ -1,4 +1,16 @@
-import { Destroy, Init, Provide, Scope, ScopeEnum, MidwayContainer, MidwayLoggerService, MidwayConfigService, MidwayEnvironmentService, MidwayInformationService } from '../src';
+import {
+  Destroy,
+  Init,
+  Provide,
+  Scope,
+  ScopeEnum,
+  MidwayContainer,
+  MidwayLoggerService,
+  MidwayConfigService,
+  MidwayEnvironmentService,
+  MidwayInformationService,
+  ConsoleLoggerFactory
+} from '../src';
 
 class Parent {}
 
@@ -34,7 +46,7 @@ describe('/test/init.test.ts', () => {
     container.registerObject('baseDir', '');
     container.registerObject('appDir', '');
 
-    const loggerService = await container.getAsync(MidwayLoggerService);
+    const loggerService = await container.getAsync(MidwayLoggerService, [container, { loggerFactory: new ConsoleLoggerFactory() }]);
     expect(loggerService['init']).toBeDefined();
   });
 });
