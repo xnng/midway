@@ -31,12 +31,10 @@ export class BootstrapStarter {
   }
 
   public async init() {
-    this.appDir = this.globalOptions.appDir || process.cwd();
-    this.baseDir = this.getBaseDir();
+    this.appDir = this.globalOptions.appDir = this.globalOptions.appDir || process.cwd();
+    this.baseDir = this.globalOptions.baseDir = this.getBaseDir();
 
     this.applicationContext = await initializeGlobalApplicationContext({
-      appDir: this.appDir,
-      baseDir: this.baseDir,
       asyncContextManager: createContextManager(),
       loggerFactory: new MidwayLoggerFactory(),
       ...this.globalOptions,
